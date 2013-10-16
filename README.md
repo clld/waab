@@ -1,4 +1,4 @@
 waab
 ====
 
-World Atlas of Affix Borrowing
+The World Atlas of Affix Borrowing
