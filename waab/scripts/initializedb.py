@@ -9,6 +9,7 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.util import slug
 from clld.lib import bibtex
+from clld.lib import dsv
 
 import waab
 from waab import models
@@ -121,6 +122,16 @@ def main(args):
     pairs = {}
     languages = {}
 
+    coords = {}
+    for lang in dsv.rows(
+        args.data_file('MB_Map_Data_Aug13WLabels'),
+        namedtuples=True,
+        newline='\n',
+        encoding='latin1'
+    ):
+        coords[slug(lang.Label.split('<')[0].strip())] = (
+            float(lang.y), float(lang.x))
+
     xls = xlrd.open_workbook(args.data_file('MB_BoCatSum.xlsx'))
     matrix = xls.sheet_by_name('Master Sheet')
     fields = [matrix.cell(0, i).value.strip() for i in range(matrix.ncols)]
@@ -181,7 +192,10 @@ def main(args):
     contrib = data.add(common.Contribution, 'waab', name="waab", id="waab")
 
     for i, name in enumerate(languages.keys()):
-        data.add(common.Language, name, name=name, id=str(i+1))
+        kw = dict(name=name, id=str(i+1))
+        if slug(name) in coords:
+            kw['latitude'], kw['longitude'] = coords[slug(name)]
+        data.add(common.Language, name, **kw)
 
     #
     # TODO: mapping multiple entried in the bibliography to the same record in the zotero
