@@ -2,6 +2,6 @@
 <%namespace name="util" file="../util.mako"/>
 
 
-<h2>Pairs</h2>
+<h2>${_('Pairs')}</h2>
 
 ${ctx.render()}

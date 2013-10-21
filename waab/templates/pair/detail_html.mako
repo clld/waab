@@ -525,6 +525,9 @@
 
 <div>${u.description(request, ctx.description)|n}</div>
 
+${request.get_datatable('values', h.models.Value, language=ctx.recipient).render()}
+
+
 <%def name="sidebar()">
     <%util:well title="Languages">
         ${util.dl_table(('recipient', h.link(request, ctx.recipient)), ('donor', h.link(request, ctx.donor)))}

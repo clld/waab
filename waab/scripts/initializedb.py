@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import sys
 import re
+from collections import defaultdict
 
 import xlrd
 from bs4 import BeautifulSoup as bs
@@ -116,6 +117,55 @@ def get_bib(args, soup):
     return res
 
 
+params = {
+    "comparative": "",
+    "superlative": "",
+    "ADJVZ": "",
+    "ADVBLZ": "",
+    "claus TAM clit": "",
+    "claus link clit": "",
+    "dat": "",
+    "erg": "",
+    "acc": "",
+    "other peri cas": "",
+    "loc": "",
+    "comparative case": "",
+    "M/F nouns": "",
+    "INAN-gender Ns": "",
+    "dim": "",
+    "aug": "",
+    "def/indef": "",
+    "topic": "",
+    "focus": "",
+    "other NMZ": "",
+    "agent nmlz": "",
+    "abstract nmlz": "",
+    "gentili": "",
+    "place names": "",
+    "pl": "",
+    "du": "",
+    "sing": "",
+    "pauc": "",
+    "other nom": "",
+    "privative": "",
+    "possPNs": "",
+    "clf.num": "",
+    "ord.num": "",
+    "othernum": "",
+    "passiv": "",
+    "causative": "",
+    "reflexive": "",
+    "applic": "",
+    "reciopr": "",
+    "verb TAM": "",
+    "other verbal deriv": "",
+    "ARG.indx on v.": "",
+    "VBZ": "",
+    "rel/sub on verb": "",
+    "verb NEG": "",
+}
+
+
 def main(args):
     data = Data()
 
@@ -134,22 +184,25 @@ def main(args):
 
     xls = xlrd.open_workbook(args.data_file('MB_BoCatSum.xlsx'))
     matrix = xls.sheet_by_name('Master Sheet')
-    fields = [matrix.cell(0, i).value.strip() for i in range(matrix.ncols)]
-    #
-    # TODO: there are ambiguous column headings, e.g. "dat".
-    #
-    params = set(filter(lambda n: n and n not in ['perm.id', 'Recipient lg.', 'Donor lg.'], fields))
+    fields = [
+        matrix.cell(0, i).value.strip() or xlrd.colname(i) for i in range(matrix.ncols)]
+
     for j in range(matrix.nrows):
-        values = dict(zip(fields, [matrix.cell(j, i).value for i in range(matrix.ncols)]))
+        values = zip(fields, [matrix.cell(j, i).value for i in range(matrix.ncols)])
+        valuesdict = dict(values)
         try:
-            pairs[int(values['perm.id'])] = values
-            languages[values['Recipient lg.']] = 1
-            languages[values['Donor lg.']] = 1
+            rec_attrs = {'macroarea': valuesdict['MacroArea']}
+            for attr in ['iso', 'fam', 'genus']:
+                rec_attrs[attr] = valuesdict['2_' + attr]
+            pairs[int(valuesdict['perm.id'])] = values
+            languages[valuesdict['Recipient lg.']] = rec_attrs
+            if valuesdict['Donor lg.'] not in languages:
+                languages[valuesdict['Donor lg.']] = {}
         except:
             continue
 
     for i, name in enumerate(params):
-        data.add(common.Parameter, name, id=str(i+1), name=name)
+        data.add(models.AffixFunction, name, id=str(i+1), name=name)
 
     with open(args.data_file('MB_Case_List_AmericPhysics.html')) as fp:
         soup = bs(fp.read())
@@ -188,11 +241,16 @@ def main(args):
         name="World Atlas of Affix Borrowing",
         domain="waab.clld.org")
     DBSession.add(dataset)
+    for i, spec in enumerate([('seifart', "Frank Seifart")]):
+        DBSession.add(common.Editor(
+            dataset=dataset,
+            ord=i + 1,
+            contributor=common.Contributor(id=spec[0], name=spec[1])))
 
     contrib = data.add(common.Contribution, 'waab', name="waab", id="waab")
 
     for i, name in enumerate(languages.keys()):
-        kw = dict(name=name, id=str(i+1))
+        kw = dict(name=name, id=str(i+1), jsondata=languages[name])
         if slug(name) in coords:
             kw['latitude'], kw['longitude'] = coords[slug(name)]
         data.add(common.Language, name, **kw)
@@ -210,24 +268,34 @@ def main(args):
             created[rec.id] = no
 
     for id_, pair in pairs.items():
-        donor = data['Language'][pair['Donor lg.']]
-        recipient = data['Language'][pair['Recipient lg.']]
+        vd = dict(pair)
+        donor = data['Language'][vd['Donor lg.']]
+        recipient = data['Language'][vd['Recipient lg.']]
         p = data.add(
             models.Pair,
             id_,
             id=str(id_),
-            name='%s -> %s' % (donor, recipient),
+            name='%s < %s' % (recipient, donor),
+            area=recipient.jsondata['macroarea'],
             description=linked_refs(doc[id_]['comment'], data['Source']),
+            reliability=vd['reliab'],
+            interrelatedness=int(vd[u'inter\u2011rel.']) if vd[u'inter\u2011rel.'] != '' else None,
+            count_affixes=int(vd['F']) if vd[u'F'] != '' else None,
             donor=donor,
             recipient=recipient)
         DBSession.flush()
         for i, param in enumerate(params):
-            value = '%s' % pair[param]
+            value = None
+            for k, v in pair:
+                if k == param:
+                    value = v
+                    break
+            #value = '%s' % pair[param]
             if value:
                 d = dict(
                     id='%s-%s' % (id_, i + 1),
                     description=value,
-                    parameter=data['Parameter'][param],
+                    parameter=data['AffixFunction'][param],
                     language=recipient,
                     contribution=contrib,
                     pair=p)
@@ -246,6 +314,8 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodiucally whenever data has been updated.
     """
+    for param in DBSession.query(models.AffixFunction):
+        param.representation = len(param.valuesets)
 
 
 if __name__ == '__main__':
