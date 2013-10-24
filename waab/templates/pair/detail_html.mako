@@ -370,11 +370,8 @@
 
 <h2>${ctx.name}</h2>
 
-<div class="row-fluid">
-    <div class="span6">
-        ${util.dl_table(('Recipient language', h.link(request, ctx.recipient)), ('Source language', h.link(request, ctx.donor)))}
-    </div>
-</div>
+<h3>Summary</h3>
+${request.get_datatable('values', h.models.Value, pair=ctx).render()}
 
 <h3>Description</h3>
 <div>${u.description(request, ctx.description)|n}</div>
@@ -382,8 +379,8 @@
 ##${request.get_datatable('values', h.models.Value, pair=ctx).render()}
 
 <%def name="sidebar()">
-    <%util:well title="Summary">
-        ${request.get_datatable('values', h.models.Value, pair=ctx).render()}
+    <%util:well title="Languages">
+        ${util.dl_table(('Recipient language', h.link(request, ctx.recipient)), ('Source language', h.link(request, ctx.donor)))}
     </%util:well>
     <%util:well title="References">
         ${util.sources_list(sorted(list(ctx.sources), key=lambda s: s.name))}
