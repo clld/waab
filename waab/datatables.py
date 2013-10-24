@@ -116,10 +116,10 @@ class References(Sources):
             DetailsCol(self, 'details', bSearchable=False, bSortable=False),
         ]
 
+    def get_options(self):
+        return {'aaSorting': [[0, 'asc'], [1, 'asc']]}
 
-#
-# TODO: recipient language specific value table!!
-#
+
 class ValueCol(Col):
     __kw__ = {
         'sClass': 'right',

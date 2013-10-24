@@ -8,7 +8,6 @@ from clld.interfaces import IMapMarker, ILanguage, IValueSet, IValue
 # we must make sure custom models are known at database initialization!
 from waab import models
 from waab.interfaces import IPair
-from waab.datatables import Pairs, AffixFunctions
 
 
 _ = lambda s: s
@@ -56,7 +55,6 @@ def main(global_config, **settings):
         ('dataset', partial(menu_item, 'dataset', label='Home')),
         ('pairs', partial(menu_item, 'pairs')),
         ('parameters', partial(menu_item, 'parameters')),
-        #('languages', partial(menu_item, 'languages')),
         ('sources', partial(menu_item, 'sources')),
     )
     config.include('waab.datatables')
