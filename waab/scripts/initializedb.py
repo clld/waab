@@ -3,6 +3,8 @@ import sys
 import re
 from collections import defaultdict
 
+from path import path
+from pylab import figure, axes, pie, savefig
 import xlrd
 from bs4 import BeautifulSoup as bs
 from clld.scripts.util import initializedb, Data, bibtex2source
@@ -19,151 +21,123 @@ from waab import models
 citation = re.compile('\[(?P<ids>[0-9]{1,3}(,\s*[0-9]{1,3})*)\]')
 
 
-def linked_refs(doc, bib):
-    """
-    TODO:
-    - parse refs from zotero bib
-    - parse refs from bibliography in doc
-    - identify
-    - parse citations and link them
-    """
-    def repl(match):
-        ids = ['**' + bib[i.strip()].id + '**' for i in match.group('ids').split(',')]
-        return '[%s]' % ', '.join(ids)
-
-    doc = unicode(doc)
-    while citation.search(doc):
-        doc = citation.sub(repl, doc)
-    return doc
-
-
 def text(n):
     return ' '.join(list(n.stripped_strings))
 
 
-def get_bib(args, soup):
-    def normalize_refdb(name):
-        if ',' in name:
-            last, first = name.split(',', 1)
-        else:
-            last, first = name, ''
-        return slug('. '.join(
-            slug(t)[0] for t in re.split('\s+|\.', first.strip()) if slug(t)) + last.strip())
+super_params = [
+    "comparative/superlative",
+    "comparative/superlative",
+    "adjectivizer",
+    "adverbializer",
+    "clause-level TAM",
+    "clause linking",
+    "case: core case",
+    "case: core case",
+    "case: core case",
+    "case: peripheral case",
+    "case: peripheral case",
+    "case: peripheral case",
+    "gender",
+    "gender",
+    "diminutive/augmentative",
+    "diminutive/augmentative",
+    "definite/indefinite",
+    "topic, focus",
+    "topic, focus",
+    "nominalizer",
+    "nominalizer",
+    "nominalizer",
+    "nominalizer",
+    "nominalizer",
+    "number",
+    "number",
+    "number",
+    "number",
+    "miscellaneous nominal derivation",
+    "privative",
+    "argument index",
+    "numeral classifier",
+    "numeral derivation",
+    "numeral derivation",
+    "valency change",
+    "valency change",
+    "valency change",
+    "valency change",
+    "valency change",
+    "verbal TAM",
+    "miscellaneous verbal derivation",
+    "argument index",
+    "verbalizer",
+    "relativzer/subordinator",
+    "verbal negation"
+]
 
-    def normalize_bib(name):
-        return filter(None, [slug(n.strip()) for n in name.split(' and ')])
+params = [
+    "comparative",
+    "superlative",
+    "adjectivizer",
+    "adverbializer",
+    "clause-level TAM",
+    "clause linking",
+    "dative",
+    "ergative",
+    "accusative",
+    "miscellaneous peripheral cases",
+    "locative",
+    "comparative case",
+    "animate gender",
+    "inanimate noun class",
+    "diminutive",
+    "augmentative",
+    "definite/indefinite",
+    "topic",
+    "focus",
+    "miscellaneous nominalizers",
+    "agent nominalizer",
+    "abstract nominalizer",
+    "social group derivation",
+    "place name derivation",
+    "plural",
+    "dual",
+    "singular",
+    "paucal",
+    "miscellaneous nominal derivation",
+    "privative",
+    "possessor index",
+    "numeral classifier",
+    "ordinal numeral derivation",
+    "miscellaneous numeral derivation",
+    "passive",
+    "causative",
+    "reflexive",
+    "applicative",
+    "reciprocal",
+    "verbal TAM",
+    "miscellaneous verbal derivation",
+    "subject/object index",
+    "verbalizer",
+    "relativzer/subordinator",
+    "verbal negation",
+]
+assert len(params) == len(set(params))
 
-    mapping = {
-        '53': 'vellard_contribucion_1967',
-        '55': 'cohen_hebrew_2012',
-        '56': 'schwarzwald_inflection_1998',
-        '108': 'bulut_turkic_????',
-        '143': 'parker_jones_loanwords_2009',
-        '155': 'sasse_sprachkontakt_1985',
-        '156': 'sasse_arvanitika._1991',
-        '200': 'varol-bornes_judeo-espagnol_2008',
-        '218': 'zavala_oraciones_2007',
-    }
+params_map = dict(zip(params, super_params))
+for k in params_map:
+    if super_params.count(params_map[k]) == 1:
+        params_map[k] = None
 
-    refdb = bibtex.Database.from_file(args.data_file('FSeifartsZoteroLibraryOct2013.bib'))
-    refmap = {}
-    for rec in refdb:
-        if not rec.genre:
-            print rec
-        if rec.genre.value == 'article':
-            title = rec.get('journal', '') + rec.get('volume', '')
-        elif rec.genre.value in ['unpublished', 'misc']:
-            title = rec.get('year', 'xxx')
-        else:
-            if rec.get('booktitle'):
-                title = 'in ' + rec['booktitle']
-            else:
-                title = rec.get('title', 'xxx')
-        authors = map(normalize_refdb, rec.get('author', rec.get('editor', 'xxx')).split(' and '))
+param_ids = {}
+for i, param in enumerate(params + list(set(super_params))):
+    param_ids[param] = i + 1
 
-        fmt = ''
-        for i, name in enumerate(authors):
-            if i > 0 and i == len(authors) - 1:
-                fmt += 'and'
-            fmt += name
-
-        refmap[rec.id] = slug(fmt + title.split(',')[0].split('(')[0])
-    res = {}
-    for p in soup.find_all('p', **{'class': 'P360'}):
-        ref = text(p)
-        match = citation.match(ref)
-        if match:
-            if match.group('ids') in mapping:
-                res[match.group('ids')] = refdb[mapping[match.group('ids')]]
-            else:
-                _ref = slug(ref[match.end():])
-
-                found = False
-                for key, data in refmap.items():
-                    if _ref.startswith(data):
-                        #print ref.encode('utf8')
-                        #print unicode(refdb[key]).encode('utf8')
-                        #print data.encode('utf8')
-                        #print
-                        found = True
-                        break
-
-                if not found:
-                    print '---!'
-                    print ref.encode('utf8')
-                    print _ref.encode('utf8')
-
-                res[match.group('ids')] = refdb[key]
-    return res
+assert len(param_ids.keys()) == len(set(param_ids.keys()))
 
 
-params = {
-    "comparative": "",
-    "superlative": "",
-    "ADJVZ": "",
-    "ADVBLZ": "",
-    "claus TAM clit": "",
-    "claus link clit": "",
-    "dat": "",
-    "erg": "",
-    "acc": "",
-    "other peri cas": "",
-    "loc": "",
-    "comparative case": "",
-    "M/F nouns": "",
-    "INAN-gender Ns": "",
-    "dim": "",
-    "aug": "",
-    "def/indef": "",
-    "topic": "",
-    "focus": "",
-    "other NMZ": "",
-    "agent nmlz": "",
-    "abstract nmlz": "",
-    "gentili": "",
-    "place names": "",
-    "pl": "",
-    "du": "",
-    "sing": "",
-    "pauc": "",
-    "other nom": "",
-    "privative": "",
-    "possPNs": "",
-    "clf.num": "",
-    "ord.num": "",
-    "othernum": "",
-    "passiv": "",
-    "causative": "",
-    "reflexive": "",
-    "applic": "",
-    "reciopr": "",
-    "verb TAM": "",
-    "other verbal deriv": "",
-    "ARG.indx on v.": "",
-    "VBZ": "",
-    "rel/sub on verb": "",
-    "verb NEG": "",
-}
+def maybe_int(value):
+    if isinstance(value, float):
+        return int(value)
+    return value
 
 
 def main(args):
@@ -182,32 +156,49 @@ def main(args):
         coords[slug(lang.Label.split('<')[0].strip())] = (
             float(lang.y), float(lang.x))
 
-    xls = xlrd.open_workbook(args.data_file('MB_BoCatSum.xlsx'))
-    matrix = xls.sheet_by_name('Master Sheet')
+    xls = xlrd.open_workbook(args.data_file('MB_BoCatSum_AFBO.xlsx'))
+    matrix = xls.sheet_by_name('Sheet1')
     fields = [
         matrix.cell(0, i).value.strip() or xlrd.colname(i) for i in range(matrix.ncols)]
+    pfields = [
+        matrix.cell(1, i).value or xlrd.colname(i) for i in range(matrix.ncols)]
 
     for j in range(matrix.nrows):
         values = zip(fields, [matrix.cell(j, i).value for i in range(matrix.ncols)])
+        pvalues = zip(pfields, [maybe_int(matrix.cell(j, i).value) for i in range(matrix.ncols)])
         valuesdict = dict(values)
         try:
-            rec_attrs = {'macroarea': valuesdict['MacroArea']}
-            for attr in ['iso', 'fam', 'genus']:
-                rec_attrs[attr] = valuesdict['2_' + attr]
-            pairs[int(valuesdict['perm.id'])] = values
+            rec_attrs = {
+                'macroarea': valuesdict['AZ'],
+                'iso': valuesdict['BD'],
+                'genus': valuesdict['BE']}
+            pairs[int(valuesdict['perm.id'])] = pvalues, valuesdict
             languages[valuesdict['Recipient lg.']] = rec_attrs
             if valuesdict['Donor lg.'] not in languages:
                 languages[valuesdict['Donor lg.']] = {}
+            #print pairs[int(valuesdict['perm.id'])]
         except:
             continue
 
-    for i, name in enumerate(params):
-        data.add(models.AffixFunction, name, id=str(i+1), name=name)
+    id_ = 0
+    for name in params:
+        id_ += 1
+        data.add(models.AffixFunction, name, id=str(id_), name=name)
 
-    with open(args.data_file('MB_Case_List_AmericPhysics.html')) as fp:
-        soup = bs(fp.read())
+    for name in filter(None, set(params_map.values())):
+        id_ += 1
+        data.add(models.AffixFunction, name, id=str(id_), name=name)
 
-    bib = get_bib(args, soup)
+    for name in params:
+        if params_map[name]:
+            data['AffixFunction'][name].superparam = data['AffixFunction'][params_map[name]]
+
+    sources = {}
+    with open(args.data_file('MB_Case_List_with_links.html')) as fp:
+        worddoc = fp.read()
+        for m in re.finditer('\"|(?P<recid>[^|]+)|\"', worddoc):
+            sources[m.group('recid')] = 1
+        soup = bs(worddoc)
 
     doc = {}
     cols = []
@@ -225,11 +216,11 @@ def main(args):
             doc[id_] = values
             if id_ in pairs:
                 try:
-                    assert doc['Recipient lg.'] == pairs[id_]['Recipient lg.']
-                    assert doc['Don'] == pairs[id_]['Donor lg.']
+                    assert doc['Recipient lg.'] == pairs[id_][1]['Recipient lg.']
+                    assert doc['Don'] == pairs[id_][1]['Donor lg.']
                 except:
                     print doc['Recipient lg.'], doc['Don']
-                    print pairs[id_]['Recipient lg.'], pairs[id_]['Donor lg.']
+                    print pairs[id_][1]['Recipient lg.'], pairs[id_][1]['Donor lg.']
             else:
                 print "----!---", id_
             #print id_, id_ in pairs
@@ -237,9 +228,9 @@ def main(args):
             continue
 
     dataset = common.Dataset(
-        id=waab.__name__,
-        name="World Atlas of Affix Borrowing",
-        domain="waab.clld.org")
+        id='afbo',
+        name="AFBO: A world-wide survey of affix borrowing",
+        domain="afbo.clld.org")
     DBSession.add(dataset)
     for i, spec in enumerate([('seifart', "Frank Seifart")]):
         DBSession.add(common.Editor(
@@ -247,7 +238,7 @@ def main(args):
             ord=i + 1,
             contributor=common.Contributor(id=spec[0], name=spec[1])))
 
-    contrib = data.add(common.Contribution, 'waab', name="waab", id="waab")
+    contrib = data.add(common.Contribution, 'afbo', name="AFBO", id="afbo")
 
     for i, name in enumerate(languages.keys()):
         kw = dict(name=name, id=str(i+1), jsondata=languages[name])
@@ -255,58 +246,94 @@ def main(args):
             kw['latitude'], kw['longitude'] = coords[slug(name)]
         data.add(common.Language, name, **kw)
 
-    #
-    # TODO: mapping multiple entried in the bibliography to the same record in the zotero
-    # bib means there's something wrong!
-    #
-    created = {}
-    for no, rec in bib.items():
-        if rec.id in created:
-            data['Source'][no] = data['Source'][created[rec.id]]
-        else:
-            data.add(common.Source, no, _obj=bibtex2source(rec))
-            created[rec.id] = no
+    refdb = bibtex.Database.from_file(args.data_file('FSeifartsZoteroLibraryOct2013.bib'))
+    for rec in refdb:
+        if slug(rec.id) in sources:
+            data.add(common.Source, slug(rec.id), _obj=bibtex2source(rec))
 
+    dl_pairs = []
     for id_, pair in pairs.items():
-        vd = dict(pair)
+        pvalues, vd = pair
+        if id_ not in doc:
+            continue
         donor = data['Language'][vd['Donor lg.']]
         recipient = data['Language'][vd['Recipient lg.']]
+        if (donor, recipient) in dl_pairs:
+            print recipient.name, '<', donor.name
+            raise ValueError
+        dl_pairs.append((donor, recipient))
         p = data.add(
             models.Pair,
             id_,
             id=str(id_),
             name='%s < %s' % (recipient, donor),
             area=recipient.jsondata['macroarea'],
-            description=linked_refs(doc[id_]['comment'], data['Source']),
+            description=unicode(doc[id_]['comment']),
             reliability=vd['reliab'],
             interrelatedness=int(vd[u'inter\u2011rel.']) if vd[u'inter\u2011rel.'] != '' else None,
             count_affixes=int(vd['F']) if vd[u'F'] != '' else None,
             donor=donor,
             recipient=recipient)
         DBSession.flush()
-        for i, param in enumerate(params):
+
+        super_values = {}
+        value = None
+
+        for param in params:
+            param_id = param_ids[param]
             value = None
-            for k, v in pair:
+            for k, v in pvalues:
                 if k == param:
                     value = v
                     break
             #value = '%s' % pair[param]
             if value:
+                if params_map[param]:
+                    sp = params_map[param]
+                    if sp in super_values:
+                        super_values[sp] += v
+                    else:
+                        super_values[sp] = v
+                vsid = '%s-%s' % (recipient.id, param_id)
+                if vsid in data['ValueSet']:
+                    vs = data['ValueSet'][vsid]
+                else:
+                    d = dict(
+                        id=vsid,
+                        parameter=data['AffixFunction'][param],
+                        language=recipient,
+                        contribution=contrib)
+                    vs = data.add(
+                        common.ValueSet, vsid, **d)
+                data.add(
+                    models.waabValue,
+                    '%s-%s' % (id_, param_id),
+                    id='%s-%s' % (id_, param_id),
+                    pair=p,
+                    name=value,
+                    description='%s' % p,
+                    valueset=vs)
+        for param, value in super_values.items():
+            param_id = param_ids[param]
+            vsid = '%s-%s' % (recipient.id, param_id)
+            if vsid in data['ValueSet']:
+                vs = data['ValueSet'][vsid]
+            else:
                 d = dict(
-                    id='%s-%s' % (id_, i + 1),
-                    description=value,
+                    id=vsid,
                     parameter=data['AffixFunction'][param],
                     language=recipient,
-                    contribution=contrib,
-                    pair=p)
+                    contribution=contrib)
                 vs = data.add(
-                    models.waabValueSet, '%s-%s' % (id_, i + 1), **d)
-                data.add(
-                    common.Value,
-                    '%s-%s' % (id_, i + 1),
-                    id='%s-%s' % (id_, i + 1),
-                    name=value,
-                    valueset=vs)
+                    common.ValueSet, vsid, **d)
+            data.add(
+                models.waabValue,
+                '%s-%s' % (id_, param_id),
+                id='%s-%s' % (id_, param_id),
+                name=value,
+                description='%s' % p,
+                pair=p,
+                valueset=vs)
 
 
 def prime_cache(args):
@@ -316,6 +343,33 @@ def prime_cache(args):
     """
     for param in DBSession.query(models.AffixFunction):
         param.representation = len(param.valuesets)
+        param.count_subparams = len(param.subparams)
+
+    colors = {}
+    for _min, _max, color in waab.COLOR_MAP:
+        _min = _min or 0
+        _max = _max or 100
+        for i in range(_min, _max + 1):
+            colors[i] = color
+
+    icons_dir = path(waab.__file__).dirname().joinpath('static')
+    for color in colors.values():
+        figure(figsize=(0.4, 0.4))
+        axes([0.1, 0.1, 0.8, 0.8])
+        coll = pie((100,), colors=('#' + color,))
+        coll[0][0].set_linewidth(0.5)
+        savefig(icons_dir.joinpath('%s.png' % color), transparent=True)
+
+    for l in DBSession.query(common.Language)\
+            .join(models.Pair, common.Language.pk == models.Pair.recipient_pk):
+        l.update_jsondata(color=colors[max(p.count_affixes for p in l.donor_assocs)])
+
+    for p in DBSession.query(models.Pair):
+        for source_id in set(waab.SOURCE_ID_PATTERN.findall(p.description)):
+            try:
+                p.sources.append(common.Source.get(source_id))
+            except:
+                print source_id
 
 
 if __name__ == '__main__':

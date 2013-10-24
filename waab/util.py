@@ -1,13 +1,7 @@
-import re
-
-from clld.web.util.helpers import link
-from clld.db.models.common import Source
-
-
-citation = re.compile('\*\*(?P<id>[^\*]+)\*\*')
+from waab import SOURCE_ID_PATTERN
 
 
 def description(req, d):
-    while citation.search(d):
-        d = citation.sub(lambda m: link(req, Source.get(m.group('id'))), d)
+    while SOURCE_ID_PATTERN.search(d):
+        d = SOURCE_ID_PATTERN.sub(lambda m: req.route_url('source', id=m.group('id')), d)
     return d

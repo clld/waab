@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-10-21 10:11+0200\n"
+"POT-Creation-Date: 2013-10-24 12:13+0200\n"
 "PO-Revision-Date: 2013-10-21 10:06+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
@@ -17,19 +17,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: waab/__init__.py:13
+#: waab/__init__.py:15
 msgid "Pair"
 msgstr "Recipient language"
 
-#: waab/__init__.py:14
+#: waab/__init__.py:16
 msgid "Pairs"
 msgstr "Recipient languages"
 
-#: waab/__init__.py:15
+#: waab/__init__.py:17
 msgid "Parameter"
 msgstr "Affix function"
 
-#: waab/__init__.py:16
+#: waab/__init__.py:18
 msgid "Parameters"
 msgstr "Affix functions"
 
+#: waab/__init__.py:19
+msgid "Source"
+msgstr "Reference"
+
+#: waab/__init__.py:20
+msgid "Sources"
+msgstr "References"
