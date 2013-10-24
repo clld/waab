@@ -1,8 +1,8 @@
 from sqlalchemy import Integer
 from sqlalchemy.sql.expression import cast
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, joinedload
 
-from clld.db.models.common import Language, Value, Parameter, ValueSet
+from clld.db.models.common import Language, Value, Parameter, ValueSet, Source
 from clld.db.util import icontains, get_distinct_values
 from clld.web.datatables.base import (
     Col, LinkCol, DataTable, filter_number, LinkToMapCol,
@@ -103,6 +103,10 @@ class ReferencedInCol(Col):
 
 
 class References(Sources):
+    def base_query(self, query):
+        query = Sources.base_query(self, query)
+        return query.options(joinedload(Source.pairs))
+
     def col_defs(self):
         return [
             Col(self, 'author'),
