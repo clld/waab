@@ -38,8 +38,6 @@ class waabMapMarker(MapMarker):
             c = ctx.jsondatadict.get('color')
         elif IValueSet.providedBy(ctx):
             c = ctx.language.jsondatadict.get('color')
-        elif IValue.providedBy(ctx):
-            c = ctx.pair.recipient.jsondatadict.get('color')
 
         if c:
             return req.static_url('waab:static/%s.png' % c)

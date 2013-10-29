@@ -124,13 +124,6 @@ class ValueCol(Col):
         return cast(Value.name, Integer)
 
 
-class ReferencesCol(Col):
-    def format(self, item):
-        return HTML.ul(
-            *[HTML.li(link(self.dt.req, source)) for source in item.pair.sources],
-            class_="unstyled")
-
-
 class waabValues(Values):
     def __init__(self, req, model, parameter=None, pair=None):
         Values.__init__(self, req, model, parameter=parameter)
