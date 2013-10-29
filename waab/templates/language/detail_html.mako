@@ -1,32 +1,28 @@
 <%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
 <%namespace name="util" file="../util.mako"/>
-
-##<ul class="breadcrumb">
-##    <li>Genus: ${ctx.jsondatadict['genus']}</li>
-##</ul>
+<%! active_menu_item = "pairs" %>
 
 <h2>${ctx.name}</h2>
 
-% if ctx.donor_assocs:
-    is a recipient in
+${util.dl_table(('Genus', ctx.jsondatadict['genus']), ('Area', ctx.jsondatadict['macroarea']))}
+
+<% attrs = ['donor', 'recipient'] %>
+% for i, attr in enumerate(attrs):
+    % if getattr(ctx, attr + '_assocs'):
+    is a ${attrs[0] if i else attrs[1]} for
     <ul>
-        % for pair in ctx.donor_assocs:
+        % for pair in getattr(ctx, attr + '_assocs'):
         <li>${h.link(request, pair)}</li>
         % endfor
     </ul>
-% endif
-
-% if ctx.recipient_assocs:
-    is a donor in
-    <ul>
-        % for pair in ctx.recipient_assocs:
-        <li>${h.link(request, pair)}</li>
-        % endfor
-    </ul>
-% endif
-
-${ctx.jsondata}
+    % endif
+% endfor
 
 <%def name="sidebar()">
-    ${util.language_meta()}
+    ${util.codes()}
+    <div style="clear: right;"> </div>
+    <%util:well>
+        ${request.map.render()}
+        ${h.format_coordinates(ctx)}
+    </%util:well>
 </%def>

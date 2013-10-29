@@ -3,7 +3,9 @@ import re
 
 from clld.web.app import get_configurator, menu_item, MapMarker
 from clld.web.adapters.base import Index, adapter_factory
+from clld.web.adapters.download import Download
 from clld.interfaces import IMapMarker, ILanguage, IValueSet, IValue
+from clld.db.models.common import Source
 
 # we must make sure custom models are known at database initialization!
 from waab import models
@@ -17,6 +19,7 @@ _('Parameter')
 _('Parameters')
 _('Source')
 _('Sources')
+_('Languages')
 
 
 SOURCE_ID_PATTERN = re.compile('\|(?P<id>[a-z0-9]+)\|')
@@ -53,10 +56,14 @@ def main(global_config, **settings):
     config.register_adapter(adapter_factory('pair/index_html.mako', base=Index), IPair)
     config.register_menu(
         ('dataset', partial(menu_item, 'dataset', label='Home')),
+        ('languages', partial(menu_item, 'languages')),
         ('pairs', partial(menu_item, 'pairs')),
         ('parameters', partial(menu_item, 'parameters')),
         ('sources', partial(menu_item, 'sources')),
     )
+    config.register_download(Download(
+        Source, 'waab', ext='bib', description="Sources as BibTeX"))
+
     config.include('waab.datatables')
     config.include('waab.adapters')
     config.include('waab.maps')

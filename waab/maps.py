@@ -11,7 +11,7 @@ class AffixFuntionMap(ParameterMap):
 
 class LanguagesMap(Map):
     def get_options(self):
-        return {'show_labels': True}
+        return {'show_labels': True, 'no_popup': True}
 
     def get_legends(self):
         values = []
@@ -36,4 +36,4 @@ class LanguagesMap(Map):
 
 def includeme(config):
     config.register_map('parameter', AffixFuntionMap)
-    config.register_map('dataset', LanguagesMap)
+    config.register_map('languages', LanguagesMap)

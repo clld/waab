@@ -31,8 +31,8 @@ class Pair(Base, IdNameDescriptionMixin):
     donor_pk = Column(Integer, ForeignKey('language.pk'))
     area = Column(Unicode)
     reliability = Column(Unicode)
-    interrelatedness = Column(Integer)
-    count_affixes = Column(Integer)
+    count_interrel = Column(Integer)
+    count_borrowed = Column(Integer)
 
     recipient = relationship(Language, primaryjoin=recipient_pk==Language.pk, backref='donor_assocs')
     donor = relationship(Language, primaryjoin=donor_pk==Language.pk, backref='recipient_assocs')
@@ -47,19 +47,14 @@ class waabValue(Value, CustomModelMixin):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
     pair_pk = Column(Integer, ForeignKey('pair.pk'))
     pair = relationship(Pair, backref='values')
+    numeric = Column(Integer)
 
-    def __unicode__(self):
-        return '%s < %s' % (self.name, self.pair.donor)
+    def format(self):
+        return '%s from %s' % (self.numeric, self.pair.donor)
 
 
 @implementer(interfaces.IParameter)
 class AffixFunction(Parameter, CustomModelMixin):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
     representation = Column(Integer)
-
-    superparam_pk = Column(Integer, ForeignKey('affixfunction.pk'))
-    subparams = relationship(
-        'AffixFunction',
-        foreign_keys=[superparam_pk],
-        backref=backref('superparam', remote_side=[pk]))
-    count_subparams = Column(Integer)
+    count_borrowed = Column(Integer)

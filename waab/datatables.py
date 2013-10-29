@@ -16,30 +16,17 @@ from clld.web.util.helpers import link
 from waab.models import Pair, AffixFunction, waabValue
 
 
-class ToggleSuperParamsCol(LinkCol):
-    choices = [('0', 'hide specific functions'), ('1', 'hide general functions')]
-
-    def search(self, qs):
-        if qs == '0':
-            # hide params with superparam:
-            return AffixFunction.superparam_pk == None
-        elif qs == '1':
-            # hide superparams:
-            return AffixFunction.count_subparams == 0
-
-
 class AffixFunctions(Parameters):
     def col_defs(self):
         return [
             LinkCol(self, 'name', sTitle='Affix function'),
-            ToggleSuperParamsCol(
-                self, 'toggle_superparams',
-                sTitle='General function',
-                get_obj=lambda i: i.superparam),
+            Col(self, 'count_borrowed',
+                sTitle='total number of borrowed affixes',
+                model_col=AffixFunction.count_borrowed),
             Col(self, 'representation',
-                sTitle='# languages',
-                sDescription='Number of languages that borrowed [affix function name] affixes',
-                model_col=AffixFunction.representation)]
+                sTitle='number of languages that borrowed affixes with this function',
+                model_col=AffixFunction.representation),
+        ]
 
 
 class DetailsCol(LinkCol):
@@ -84,11 +71,11 @@ class Pairs(DataTable):
         return [
             RecipientCol(self, 'recipient', sTitle='Recipient language'),
             DonorCol(self, 'donor', sTitle='Source language'),
-            Col(self, 'count_affixes', sTitle='# affixes', sDescription='Number of borrowed affixes'),
-            Col(self, 'interrelatedness', sTitle='# interrel. aff.', sDescription='Number of interrelated borrowed affixes'),
+            Col(self, 'count_borrowed', sTitle='# affixes', sDescription='Number of borrowed affixes'),
+            Col(self, 'count_interrel', sTitle='# interrel. aff.', sDescription='Number of interrelated borrowed affixes'),
             Col(self, 'area', choices=get_distinct_values(Pair.area)),
             Col(self, 'reliability', choices=get_distinct_values(Pair.reliability)),
-            DetailsCol(self, 'details', bSearchable=False, bSortable=False),
+            LinkCol(self, 'details', model_col=Pair.name),
         ]
 
     def get_options(self):
@@ -160,35 +147,35 @@ class waabValues(Values):
         if self.pair:
             query = query.join(ValueSet.parameter)
             return query.filter(waabValue.pair_pk == self.pair.pk)
+        if self.parameter:
+            return query.join(waabValue.pair)
         return query
 
     def col_defs(self):
         if self.parameter:
-            res = [LinkCol(self, 'recipient_language', get_obj=lambda i: i.pair)]
-        elif self.pair:
-            res = [
+            return [
+                LinkCol(self, 'language', get_obj=lambda i: i.pair, model_col=Pair.name),
+                ValueCol(self, 'value', sTitle='number of borrowed affixes'),
+                LinkToMapCol(self, 'm', get_obj=lambda i: i.pair.recipient)]
+        if self.pair:
+            return [
                 LinkCol(
                     self, 'affix_function',
                     sTitle='Affix function',
                     get_obj=lambda i: i.valueset.parameter,
                     model_col=Parameter.name),
-                ToggleSuperParamsCol(
-                    self, 'toggle_superparams',
-                    sTitle='General function',
-                    get_obj=lambda i: i.valueset.parameter.superparam)]
-        else:
-            res = []
-        res.append(ValueCol(self, 'value'))
-        if self.parameter:
-            res.append(ReferencesCol(self, 'references'))
-            res.append(LinkToMapCol(self, 'm', get_obj=lambda i: i.pair.recipient))
-        return res
+                ValueCol(self, 'value', sTitle='number of borrowed affixes')]
+        return []
 
     def xhr_query(self):
         res = Values.xhr_query(self) or {}
         if self.pair:
             res['pair'] = self.pair.id
         return res
+
+    def get_options(self):
+        if self.pair or self.parameter:
+            return {'bPaginate': False}
 
 
 def includeme(config):
