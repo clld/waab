@@ -22,7 +22,7 @@ _('Sources')
 _('Languages')
 
 
-SOURCE_ID_PATTERN = re.compile('\|(?P<id>[a-z0-9]+)\|')
+SOURCE_ID_PATTERN = re.compile('__(?P<id>[a-z0-9]+)__')
 COLOR_MAP = [
     (10, None, '8b4512'),
     (5, 9, 'cd661c'),

@@ -1,27 +1,22 @@
-from clld.web.maps import ParameterMap, Map, Legend
+from clld.web.maps import Map, Legend
 from clld.web.util.htmllib import HTML, literal
 
 from waab import COLOR_MAP
 
 
-class AffixFuntionMap(ParameterMap):
-    def get_options(self):
-        return {'show_labels': True}
-
-
 class LanguagesMap(Map):
     def get_options(self):
-        return {'show_labels': True, 'no_popup': True}
+        return {'no_popup': True}
 
     def get_legends(self):
         values = []
         for _min, _max, color in COLOR_MAP:
             if not _max:
-                label = '> %s' % (_min - 1,)
+                label = '%s or more' % _min
             elif not _min:
-                label = '< %s' % (_max + 1,)
+                label = '%s' % _max
             else:
-                label = ','.join(map(str, range(_min, _max + 1)))
+                label = '-'.join(map(str, [_min, _max]))
 
             values.append(HTML.label(
                 HTML.img(
@@ -35,5 +30,4 @@ class LanguagesMap(Map):
 
 
 def includeme(config):
-    config.register_map('parameter', AffixFuntionMap)
     config.register_map('languages', LanguagesMap)

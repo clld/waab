@@ -1,3 +1,4 @@
+# coding: utf8
 from __future__ import unicode_literals
 import sys
 import re
@@ -31,6 +32,33 @@ def text(n):
     return ' '.join(list(n.stripped_strings))
 
 
+COORDS = {
+    'Alabama and Choctaw‑Chickasaw': (35.23888888888889, -96.23972222222223),
+    'Carapana, Tatuyo, Wáimaja, and Yurutí': (0.92, -71.42),
+    'Central Mexicano Nahuatl': (18.7475, -99.07027777777778),
+    'Chinese of Línxìa/Hézōu': (35.6, 103.21666666666667),
+    'Cho’ol': (17.3, -92.43333333333334),
+    'Ilwana': (-0.4569444444444445, 39.65833333333333),
+    'Dagur': (48, 124),
+    'German': (56.94888888888889, 24.10638888888889),
+    'Hungarian': (45.82527777777778, 17.822222222222223),
+    'Ingrian Finnish': (59.916666666666664, 29.766666666666666),
+    'Judeo‑Spanish': (41.01361111111111, 28.955),
+    'Mexicanero de la Sierra Madre Occidental': (24.934722222222224, -104.91194444444444),
+    'Middle English': (51.5072, -0.1275),
+    'Middle Mongolic': (46.0000, 105.0000),
+    'Moroccan Arabic': (34.03333333333333, -6.833333333333333),
+    'Purepecha/Tarascan': (19.5, -101.75),
+    'Sebjan‑Küöl Ėven': (66.41666666666667, 128.41666666666666),
+    'Sonqor Turkic': (34.783611111111114, 47.60027777777778),
+    'Hasankeyf Arabic': (37.714108333333336, 41.41316666666667),
+    'Uchur Ėvenki': (56, 125),
+    'Wayampi‑Emerillon‑Zo’é': (3.25, -52.33),
+    'Western Kurmanji': (38.833333333333336, 43.833333333333336),
+    'Western Neo‑Aramaic of Ma’lūla': (33.844166666666666, 36.54666666666667),
+}
+
+
 def main(args):
     data = Data()
 
@@ -49,16 +77,24 @@ def main(args):
 
     xls = xlrd.open_workbook(args.data_file('MB_BoCatSum_AFBO.xlsx'))
     matrix = xls.sheet_by_name('MB_BoCatSum_AFBO.txt')
-    md = "Area\trecipient language iso\trecipient language genus\tdonor language iso\tdonor language genus".split('\t')
+    md = "area\trecipient language iso\trecipient language genus\tdonor language iso\tdonor language genus".split('\t')
 
     fields = []
     params = []
     for i in range(matrix.ncols):
         colname = xlrd.colname(i)
+        if len(colname) == 2 and colname > 'BE':
+            break
         colval = matrix.cell(0, i).value.strip()
-        if (len(colname) == 1 and colname > 'G') or (len(colname) == 2 and colname < 'BA'):
+        if (len(colname) == 1 and colname > 'G') or (len(colname) == 2 and colname < 'AY'):
             params.append(colval)
-        fields.append(colval)
+            fields.append(colval)
+        else:
+            fields.append(colval.lower())
+
+    for f in fields:
+        if fields.count(f) > 1:
+            print f
 
     assert len(fields) == len(set(fields))
 
@@ -71,17 +107,24 @@ def main(args):
 
         pairs[id_] = values
         for type_ in ['recipient', 'donor']:
-            languages[values[type_.capitalize() + ' language']] = {
-                'macroarea': values['Area']}
+            languages[values[type_ + ' language'].strip()] = {
+                'macroarea': values['area']}
             for md in ['iso', 'genus']:
-                languages[values[type_.capitalize() + ' language']][md] \
+                languages[values[type_ + ' language'].strip()][md] \
                     = values['%s language %s' % (type_, md)]
+
+    for name in COORDS:
+        assert name in languages
 
     sources = {}
     with open(args.data_file('MB_Case_List_with_links.html')) as fp:
         worddoc = fp.read()
-        for m in re.finditer('\"|(?P<recid>[^|]+)|\"', worddoc):
-            sources[m.group('recid')] = 1
+        for m in re.finditer('\"__(?P<recid>[^_]+)__\"', worddoc):
+            #if not m.group('recid'):
+            #    print '-----------'
+            #    print worddoc[m.start()-10:m.end()+10]
+            #    continue
+            sources[m.group('recid').decode('utf8')] = 1
         soup = bs(worddoc)
 
     doc = {}
@@ -100,11 +143,11 @@ def main(args):
             doc[id_] = values
             if id_ in pairs:
                 try:
-                    assert doc['Recipient lg.'] == pairs[id_][1]['Recipient language']
-                    assert doc['Don'] == pairs[id_][1]['Donor language']
+                    assert doc['Recipient lg.'] == pairs[id_][1]['recipient language']
+                    assert doc['Don'] == pairs[id_][1]['donor language']
                 except:
                     print doc['Recipient lg.'], doc['Don']
-                    print pairs[id_][1]['Recipient language'], pairs[id_][1]['Donor language']
+                    print pairs[id_][1]['recipient language'], pairs[id_][1]['donor language']
             else:
                 print "----!---", id_
             #print id_, id_ in pairs
@@ -114,6 +157,7 @@ def main(args):
     dataset = common.Dataset(
         id='afbo',
         name="AFBO: A world-wide survey of affix borrowing",
+        contact="frank_seifart@eva.mpg.de",
         domain="afbo.clld.org")
     DBSession.add(dataset)
     for i, spec in enumerate([('seifart', "Frank Seifart")]):
@@ -128,7 +172,9 @@ def main(args):
         md = languages[name]
         iso = md.pop('iso')
         kw = dict(name=name, id=str(i+1), jsondata=md)
-        if slug(name) in coords:
+        if name in COORDS:
+            kw['latitude'], kw['longitude'] = COORDS[name]
+        elif slug(name) in coords:
             kw['latitude'], kw['longitude'] = coords[slug(name)]
         l = data.add(common.Language, name, **kw)
 
@@ -143,9 +189,13 @@ def main(args):
                     common.LanguageIdentifier, '%s-%s' % (code, l.id),
                     identifier=identifier, language=l)
 
-    refdb = bibtex.Database.from_file(args.data_file('FSeifartsZoteroLibraryOct2013.bib'))
+    include = sources.keys() + [
+        'myersscottoncontact2002', 'myersscottonlanguage2007',
+        'meakinsborrowing2011', 'seifartprinciple2012',
+    ]
+    refdb = bibtex.Database.from_file(args.data_file('FSeifartZoteroLibrary8Nov2013.bib'))
     for rec in refdb:
-        if slug(rec.id) in sources:
+        if slug(rec.id) in include:
             data.add(common.Source, slug(rec.id), _obj=bibtex2source(rec))
 
     for i, name in enumerate(params):
@@ -154,17 +204,17 @@ def main(args):
     for id_, vd in pairs.items():
         assert id_ in doc
 
-        donor = data['Language'][vd['Donor language']]
-        recipient = data['Language'][vd['Recipient language']]
+        donor = data['Language'][vd['donor language'].strip()]
+        recipient = data['Language'][vd['recipient language'].strip()]
 
         p = data.add(
             models.Pair,
             id_,
             id=str(id_),
-            name=vd['Pairs'],
+            name=vd['pairs'],
             area=recipient.jsondata['macroarea'],
             description=unicode(doc[id_]['comment']).replace('<h1', '<p').replace('</h1>', '</p>'),
-            reliability=vd['reliab'],
+            reliability=vd['reliability'],
             count_interrel=int(vd[u'number of interrelated affixes']),
             count_borrowed=int(vd['number of borrowed affixes']),
             donor=donor,

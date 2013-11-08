@@ -70,9 +70,9 @@ class Pairs(DataTable):
     def col_defs(self):
         return [
             RecipientCol(self, 'recipient', sTitle='Recipient language'),
-            DonorCol(self, 'donor', sTitle='Source language'),
-            Col(self, 'count_borrowed', sTitle='# affixes', sDescription='Number of borrowed affixes'),
-            Col(self, 'count_interrel', sTitle='# interrel. aff.', sDescription='Number of interrelated borrowed affixes'),
+            DonorCol(self, 'donor', sTitle='Donor language'),
+            Col(self, 'count_borrowed', sTitle='Number of borrowed affixes'),
+            Col(self, 'count_interrel', sTitle='Number of interrelated affixes'),
             Col(self, 'area', choices=get_distinct_values(Pair.area)),
             Col(self, 'reliability', choices=get_distinct_values(Pair.reliability)),
             LinkCol(self, 'details', model_col=Pair.name),
@@ -147,8 +147,8 @@ class waabValues(Values):
     def col_defs(self):
         if self.parameter:
             return [
-                LinkCol(self, 'language', get_obj=lambda i: i.pair, model_col=Pair.name),
-                ValueCol(self, 'value', sTitle='number of borrowed affixes'),
+                LinkCol(self, 'languages', sTitle="Languages", get_obj=lambda i: i.pair, model_col=Pair.name),
+                ValueCol(self, 'value', sTitle='number of borrowed %s affixes' % self.parameter.name),
                 LinkToMapCol(self, 'm', get_obj=lambda i: i.pair.recipient)]
         if self.pair:
             return [
