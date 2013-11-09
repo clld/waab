@@ -232,12 +232,10 @@
 	.P308 {  margin-bottom:0in; margin-top:0in;   margin-left:0.1972in; margin-right:0in; text-indent:-0.1972in; }
 	.P309 {  margin:100%; margin-left:0.5in; margin-right:0in; text-indent:-0.5in;   }
 	.P310 {    text-decoration:underline; }
-	.P312 {   line-height:100%;  vertical-align:middle;  }
-	.P313 {   line-height:100%;  vertical-align:middle;  text-decoration:underline; }
-	.P314 {   line-height:100%;  vertical-align:top;  margin-left:0.1972in; margin-right:0in; text-indent:-0.1972in; }
-	.P315 {  line-height:100%; margin:100%; margin-left:0.1972in; margin-right:0in; text-align:left ! important; text-indent:-0.1972in;   }
-	.P316 {  line-height:100%; margin:100%; margin-left:0in; margin-right:0in; text-align:left ! important; text-indent:0in;   }
-	.P317 {  line-height:100%; margin:100%; margin-left:0in; margin-right:0in; text-align:left ! important; text-indent:0in;   font-style:italic; }
+	.P312 {   vertical-align:middle;  }
+	.P313 {   vertical-align:middle;  text-decoration:underline; }
+	.P314 {   vertical-align:top;  margin-left:0.1972in; margin-right:0in; text-indent:-0.1972in; }
+	.P317 {  margin-left:0in; margin-right:0in; text-align:left ! important; text-indent:0in;   font-style:italic; }
 	.P36 {    font-weight:bold; }
 	.P4 {    text-decoration:underline; font-weight:bold; }
 	.P5 {    font-weight:bold; }
