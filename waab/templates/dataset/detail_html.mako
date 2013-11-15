@@ -14,7 +14,7 @@
     references. The entire database underlying AfBo can be downloaded.
 </p>
 
-<p>
+<p style="font-size: larger;">
     AfBo was compiled by Frank Seifart between 2007 and 2013 with funding from the
     Max Planck Insititute for Evolutionary Anthropology's
     ${h.external_link('http://www.eva.mpg.de/linguistics/index.html', label='Department of Linguistics')},
@@ -22,7 +22,7 @@
     ${h.external_link('http://clld.org', label='Cross-Linguistic Linked Data')}
     project, led by Martin Haspelmath.
 </p>
-<p>
+<p style="font-size: larger;">
     The content of this web site, including the
     <a href="${request.route_url('download')}">downloadable database</a>,
     is  published under a
@@ -32,6 +32,6 @@
     ${h.cite_button(request, ctx)}
 </p>
 <% citation = h.get_adapter(h.interfaces.IRepresentation, ctx, request, ext='md.txt') %>
-<blockquote>
+<blockquote style="font-size: larger;">
     ${h.newline2br(citation.render(ctx, request))|n}
 </blockquote>

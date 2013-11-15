@@ -54,11 +54,11 @@ def main(global_config, **settings):
     config.register_adapter(adapter_factory('pair/index_html.mako', base=Index), IPair)
     config.register_menu(
         ('dataset', partial(menu_item, 'dataset', label='Home')),
+        ('about', lambda c, r: (r.route_url('about'), 'About')),
         ('languages', partial(menu_item, 'languages')),
         ('pairs', partial(menu_item, 'pairs')),
         ('parameters', partial(menu_item, 'parameters')),
         ('sources', partial(menu_item, 'sources')),
-        ('about', lambda c, r: (r.route_url('about'), 'About')),
     )
     config.register_download(Download(
         Source, 'waab', ext='bib', description="Sources as BibTeX"))

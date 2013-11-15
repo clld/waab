@@ -24,9 +24,12 @@ citation = re.compile('\[(?P<ids>[0-9]{1,3}(,\s*[0-9]{1,3})*)\]')
 GC = create_engine('postgresql://robert@/glottolog3')
 
 glottocodes = {}
-for row in GC.execute('select ll.hid, l.id from language as l, languoid as ll where ll.pk = l.pk'):
+glottocoords = {}
+for row in GC.execute('select ll.hid, l.id, l.latitude, l.longitude from language as l, languoid as ll where ll.pk = l.pk'):
     if row[0] and len(row[0]) == 3:
         glottocodes[row[0]] = row[1]
+        if row[2] != None:
+            glottocoords[row[0]] = (row[2], row[3])
 
 
 def text(n):
@@ -122,10 +125,6 @@ def main(args):
     with open(args.data_file('MB_Case_List_with_links.html')) as fp:
         worddoc = fp.read()
         for m in re.finditer('\"__(?P<recid>[^_]+)__\"', worddoc):
-            #if not m.group('recid'):
-            #    print '-----------'
-            #    print worddoc[m.start()-10:m.end()+10]
-            #    continue
             sources[m.group('recid').decode('utf8')] = 1
         soup = bs(worddoc)
 
@@ -144,15 +143,8 @@ def main(args):
             id_ = int(text(values['perm.id']))
             doc[id_] = values
             if id_ in pairs:
-                try:
-                    assert doc['Recipient lg.'] == pairs[id_][1]['recipient language']
-                    assert doc['Don'] == pairs[id_][1]['donor language']
-                except:
-                    print doc['Recipient lg.'], doc['Don']
-                    print pairs[id_][1]['recipient language'], pairs[id_][1]['donor language']
-            else:
-                print "----!---", id_
-            #print id_, id_ in pairs
+                assert doc['Recipient lg.'] == pairs[id_][1]['recipient language']
+                assert doc['Don'] == pairs[id_][1]['donor language']
         except:
             continue
 
@@ -183,6 +175,10 @@ def main(args):
             kw['latitude'], kw['longitude'] = COORDS[name]
         elif slug(name) in coords:
             kw['latitude'], kw['longitude'] = coords[slug(name)]
+        elif glottocoords.get(iso):
+            kw['latitude'], kw['longitude'] = glottocoords[iso]
+        if not 'latitude' in kw:
+            print name
         l = data.add(common.Language, name, **kw)
 
         for code, type_ in [
