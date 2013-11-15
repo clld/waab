@@ -58,6 +58,7 @@ def main(global_config, **settings):
         ('pairs', partial(menu_item, 'pairs')),
         ('parameters', partial(menu_item, 'parameters')),
         ('sources', partial(menu_item, 'sources')),
+        ('about', lambda c, r: (r.route_url('about'), 'About')),
     )
     config.register_download(Download(
         Source, 'waab', ext='bib', description="Sources as BibTeX"))
@@ -65,4 +66,6 @@ def main(global_config, **settings):
     config.include('waab.datatables')
     config.include('waab.adapters')
     config.include('waab.maps')
+    config.add_route('about', '/about')
+    config.add_view(lambda r: {}, route_name='about', renderer='about.mako')
     return config.make_wsgi_app()

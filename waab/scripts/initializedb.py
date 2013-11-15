@@ -160,7 +160,12 @@ def main(args):
         id='afbo',
         name="AfBo: A world-wide survey of affix borrowing",
         contact="frank_seifart@eva.mpg.de",
-        domain="afbo.info")
+        domain="afbo.info",
+        license='http://creativecommons.org/licenses/by/3.0/',
+        jsondata={
+            'license_icon': 'cc-by.png',
+            'license_name': 'Creative Commons Attribution 3.0 Unported License'})
+
     DBSession.add(dataset)
     for i, spec in enumerate([('seifart', "Frank Seifart")]):
         DBSession.add(common.Editor(

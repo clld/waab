@@ -1,4 +1,4 @@
-<%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
+<%inherit file="../waab.mako"/>
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "parameters" %>
 <%block name="title"> - ${ctx.name}</%block>
