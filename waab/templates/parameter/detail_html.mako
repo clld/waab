@@ -6,4 +6,9 @@
 <h2>Borrowed ${ctx.name} affixes</h2>
 
 ${request.map.render()}
+
+<div class="row-fluid">
+    <div class="span6">
 ${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
+    </div>
+</div>

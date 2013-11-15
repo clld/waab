@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as bs
 
 from clld.util import slug
 from clld.lib import bibtex
+from clld.scripts.util import parsed_args
 
 
 empty_span = '(\s*((\<a name\="\[^\"]+\"\>)|(\<span class\=\"T[0-9]+\"\>\s*\<\/span\>))\s*)*\s*'
@@ -16,15 +17,17 @@ u_year_pages = '[0-9]{4}[a-z]?(\:' + pages + '(\s+and\s+passim)?)?'
 mult_year_pages = '(?P<yp>' + u_year_pages + '(;\s*' + u_year_pages + ')*)'
 u_mult_year_pages = '(' + u_year_pages + '(;\s*' + u_year_pages + ')*)'
 
+iname = '(\s*de\s+)?([A-Z\xc1\xc7\xd6][\w\u0301]+(\s+|\-|\u2011))*[A-Z\xc1\xc7\xd6][\w\u0301]+(\s+et\s+al\.)?'
 name = '(\s+de\s+)?([A-Z\xc1\xc7\xd6][\w\u0301]+(\s+|\-|\u2011))*[A-Z\xc1\xc7\xd6][\w\u0301]+(\s+et\s+al\.)?'
 names = '(?P<name>(' + name + ' (and|\&amp\;) )*' + name + ')'
+inames = '(?P<name>(' + iname + ' (and|\&amp\;) )*' + name + ')'
 u_names = '((' + name + ' (and|\&amp\;) )*' + name + ')'
 
 # name (year:pages+)
 p1 = re.compile(names + '(\u2019s)?\s*(\<\/span\>)?' + empty_span + '(\<span class\=\"T[0-9]+\"\>)?\(' + mult_year_pages + '\)?(\<\/span\>)?', re.U)
 
 # ((comment)? name year:pages)
-p2 = re.compile('\(((example(s)? from|from|see also)\s+)?' + names + '\s+' + mult_year_pages + '\)', re.U)
+p2 = re.compile('\(((example(s)? from|from|see also)\s+)?' + inames + '\s+' + mult_year_pages + '\)', re.U)
 
 citation = '((citing|see also)\s+)?' + names + '\s+' + year_pages
 u_citation = '((citing|see also)\s+)?' + u_names + '\s+' + u_year_pages
@@ -239,7 +242,7 @@ def get_bib(soup, refdb):
 
     global BIB
     name = None
-    for p in soup.find_all('p', **{'class': re.compile('P309')}):
+    for p in soup.find_all('p', **{'class': re.compile('P300')}):
         ref = text(p)
         if 'Forthcoming.' in ref or 'In press.' in ref:
             author, year, rem = re.split('\s*\.?\s*(Forthcoming|In press)\.', ref, 1)
@@ -274,35 +277,25 @@ def get_bib(soup, refdb):
     return res
 
 
-if __name__ == '__main__':
-    c = file('MB_Case_List.html').read().decode('utf8')
+def main(args):
+    c = file(args.data_file('MB_Case_List.html')).read().decode('utf8')
     c = c.replace('Roth 1979; 2003', 'Roth 1979; Roth 2003')
     c = c.replace('; see also Adelaar 2005; 2009; 2010)', ') (see also Adelaar 2005; Adelaar 2009; Adelaar 2010)')
     c = c.replace('Adelaar (1987; see also 1996:1328)', 'Adelaar (1987) (see also Adelaar 1996:1328)')
     c = c.replace('; see also ', ') (see also ')
+    c = c.replace('(de Reuse', '( de Reuse')
+    c = c.replace('Bulut (2005; 2007; In press)', 'Bulut (2005; 2007) and Bulut (In press)')
 
-    refdb = bibtex.Database.from_file('FSeifartZoteroLibrary8Nov2013.bib')
+    refdb = bibtex.Database.from_file(args.data_file('FSeifartZoteroLibrary14Nov2013.bib'))
     bib = get_bib(bs(c), refdb)
 
-    if 1:
-        #pass
-        with open('MB_Case_List_with_links.html', 'w') as fp:
-            fp.write(replace(c, bib).encode('utf8'))
-    else:
-        n = 0
-        for m in p1.finditer(c):
-            n += 1
-            print m.group('name'), m.group('yp')
-        print '------'
-        for m in p2.finditer(c):
-            n += 1
-            print m.group('name'), m.group('yp')
-        print '------'
-        for m in p3.finditer(c):
-            n += 1
-            print m.group('mult')
-        print n, 'found'
+    with open(args.data_file('MB_Case_List_with_links.html'), 'w') as fp:
+        fp.write(replace(c, bib).encode('utf8'))
     print len(LINKED)
     for recid in BIB:
         if recid not in LINKED:
             print BIB[recid]
+
+
+if __name__ == '__main__':
+    main(parsed_args())

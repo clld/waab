@@ -6,3 +6,9 @@
 <h2>Map</h2>
 
 ${request.map.render()}
+
+<script>
+$(document).ready(function() {
+    $('#legend-values-opener').click();
+});
+</script>

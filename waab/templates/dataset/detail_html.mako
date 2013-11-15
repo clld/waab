@@ -11,20 +11,20 @@
         <li><a href="#coding">Data coding</a></li>
         <li><a href="#reliability">Reliability of borrowed status and affixhood</a></li>
         <li><a href="#representation">Representation of data</a></li>
-        <li><a href="#citing">Using and citing AFBO</a></li>
+        <li><a href="#citing">Using and citing AfBo</a></li>
         <li><a href="#acknowledgements">Acknowledgements</a></li>
     </ul>
     </%util:well>
 </%def>
 
-<h2>Welcome to AFBO</h2>
+<h2>Welcome to AfBo</h2>
 <p class="lead">
-    AFBO comprises descriptions of 101 cases of affix borrowing, i.e. cases where one
+    AfBo comprises descriptions of 101 cases of affix borrowing, i.e. cases where one
     language borrowed at least one affix from another language, involving a total of 657
     borrowed affixes. It includes an online interface with descriptions of borrowed
     affixes in terms of their forms and functions, examples of combinations of borrowed
-    affixes with native stems, search functions, maps, and over 220 bibliographical
-    references. The entire database underlying AFBO can be downloaded.
+    affixes with native stems, search functions, maps, and over 230 bibliographical
+    references. The entire database underlying AfBo can be downloaded.
 </p>
 
 <%util:section id="sources" title="Data sources">
@@ -71,7 +71,7 @@
     language (Gurindji for Gurindji Kriol and Russian for Copper Island Aleut), following
     <a href="${request.route_url('source', id='meakinsborrowing2011')}">Meakins' (2011)</a>
     analysis of (English-based) Gurindji Kriol as having borrowed
-    Gurindji case markers. Note that in AFBO, Gurindji Kriol and Copper Island Aleut do not
+    Gurindji case markers. Note that in AfBo, Gurindji Kriol and Copper Island Aleut do not
     appear as borrowing exceptionally many affixes: Gurindji Kriol is the sixth most heavily
     affix-borrowing language in the sample, Copper Island Aleut the ninth.
 </p>
@@ -80,7 +80,7 @@
 <%util:section id="affix" title="What counts as an affix?">
 <p>
     Any morphologically bound form from a closed class that fulfills a derivational or
-    inflectional function counts as an affix in AFBO. By this definition, clitics are
+    inflectional function counts as an affix in AfBo. By this definition, clitics are
     included as instances of affix borrowing, as long as they fulfill a derivational or
     inflectional function, e.g. tense, evidentiality, or topic marking. Potential doubts
     whether a given form is a bound or a free are explicitly noted in the descriptions and
@@ -103,7 +103,7 @@
     present in the recipient language before contact, (ii) evidence that the source form
     was present in the donor language at the time of contact, and (iii) evidence that the
     similarity between source form and borrowed form is not coincidental. Even though the
-    sources consulted for AFBO rarely if ever explicitly provide such complete
+    sources consulted for AfBo rarely if ever explicitly provide such complete
     information, the authors of these sources are often authorities in the language
     families concerned, which gives credibility to their judgments that a given form is
     borrowed.
@@ -182,15 +182,15 @@ out of a total of five case markers are borrowed)</li>
 </p>
 </%util:section>
 
-<%util:section id="citing" title="Using and citing AFBO">
+<%util:section id="citing" title="Using and citing AfBo">
 <p>${h.cite_button(request, ctx)}</p>
 <p>
     If you go back to the original
-    resource, on which descriptions of affix borrowing in AFBO are
+    resource, on which descriptions of affix borrowing in AfBo are
     based, that original resource should be cited. If you refer to results obtained from
-    AFBO, such as the
+    AfBo, such as the
     frequency of borrowing affixes with a specific function, you should
-    cite AFBO as
+    cite AfBo as
 </p>
 <% citation = h.get_adapter(h.interfaces.IRepresentation, ctx, request, ext='md.txt') %>
 <blockquote>
@@ -201,11 +201,11 @@ out of a total of five case markers are borrowed)</li>
 <%util:section id="acknowledgements" title="Acknowledgements">
 <p>
     Many people have contributed to
-    building AFBO, as explicitly noted in the descriptions of
+    building AfBo, as explicitly noted in the descriptions of
     individual case of affix borrowing. In addition, I am grateful to
-    Martin Haspelmath for publishing AFBO as part of the
+    Martin Haspelmath for publishing AfBo as part of the
     ${h.external_link('http://clld.org', label='Cross-Linguistic Linked Data')}
     project, to Robert Forkel for programming
-    the web interface, and to Lena Sell for proofreading.
+    the web interface, and to Lena Sell, Lisa Steinbach, and Evgeniya Zhivotova for proofreading.
 </p>
 </%util:section>

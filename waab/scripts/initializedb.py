@@ -17,6 +17,7 @@ from clld.lib import dsv
 
 import waab
 from waab import models
+from waab.scripts import citations
 
 
 citation = re.compile('\[(?P<ids>[0-9]{1,3}(,\s*[0-9]{1,3})*)\]')
@@ -60,6 +61,7 @@ COORDS = {
 
 
 def main(args):
+    citations.main(args)
     data = Data()
 
     pairs = {}
@@ -156,9 +158,9 @@ def main(args):
 
     dataset = common.Dataset(
         id='afbo',
-        name="AFBO: A world-wide survey of affix borrowing",
+        name="AfBo: A world-wide survey of affix borrowing",
         contact="frank_seifart@eva.mpg.de",
-        domain="afbo.clld.org")
+        domain="afbo.info")
     DBSession.add(dataset)
     for i, spec in enumerate([('seifart', "Frank Seifart")]):
         DBSession.add(common.Editor(
@@ -166,7 +168,7 @@ def main(args):
             ord=i + 1,
             contributor=common.Contributor(id=spec[0], name=spec[1])))
 
-    contrib = data.add(common.Contribution, 'afbo', name="AFBO", id="afbo")
+    contrib = data.add(common.Contribution, 'afbo', name="AfBo", id="afbo")
 
     for i, name in enumerate(languages.keys()):
         md = languages[name]
@@ -193,7 +195,7 @@ def main(args):
         'myersscottoncontact2002', 'myersscottonlanguage2007',
         'meakinsborrowing2011', 'seifartprinciple2012',
     ]
-    refdb = bibtex.Database.from_file(args.data_file('FSeifartZoteroLibrary8Nov2013.bib'))
+    refdb = bibtex.Database.from_file(args.data_file('FSeifartZoteroLibrary14Nov2013.bib'))
     for rec in refdb:
         if slug(rec.id) in include:
             data.add(common.Source, slug(rec.id), _obj=bibtex2source(rec))
@@ -215,6 +217,7 @@ def main(args):
             area=recipient.jsondata['macroarea'],
             description=unicode(doc[id_]['comment']).replace('<h1', '<p').replace('</h1>', '</p>'),
             reliability=vd['reliability'],
+            int_reliability=['high', 'mid', 'low'].index(vd['reliability']),
             count_interrel=int(vd[u'number of interrelated affixes']),
             count_borrowed=int(vd['number of borrowed affixes']),
             donor=donor,

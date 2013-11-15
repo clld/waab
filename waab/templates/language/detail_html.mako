@@ -21,8 +21,10 @@ ${util.dl_table(('Genus', ctx.jsondatadict['genus']), ('Area', ctx.jsondatadict[
 <%def name="sidebar()">
     ${util.codes()}
     <div style="clear: right;"> </div>
+    % if ctx.latitude is not None:
     <%util:well>
         ${request.map.render()}
-        ${h.format_coordinates(ctx)}
+        ${h.format_coordinates(ctx, wgs_link=False)}
     </%util:well>
+    % endif
 </%def>

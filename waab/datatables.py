@@ -56,6 +56,13 @@ class RecipientCol(LinkCol):
         return self.dt.recipient.name
 
 
+class ReliabilityCol(Col):
+    __kw__ = {'choices': ['high', 'mid', 'low']}
+
+    def order(self):
+        return Pair.int_reliability
+
+
 class Pairs(DataTable):
     def __init__(self, *args, **kw):
         super(Pairs, self).__init__(*args, **kw)
@@ -74,7 +81,7 @@ class Pairs(DataTable):
             Col(self, 'count_borrowed', sTitle='Number of borrowed affixes'),
             Col(self, 'count_interrel', sTitle='Number of interrelated affixes'),
             Col(self, 'area', choices=get_distinct_values(Pair.area)),
-            Col(self, 'reliability', choices=get_distinct_values(Pair.reliability)),
+            ReliabilityCol(self, 'reliability'),
             LinkCol(self, 'details', model_col=Pair.name),
         ]
 
