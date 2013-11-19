@@ -25,9 +25,13 @@ GC = create_engine('postgresql://robert@/glottolog3')
 
 glottocodes = {}
 glottocoords = {}
-for row in GC.execute('select ll.hid, l.id, l.latitude, l.longitude from language as l, languoid as ll where ll.pk = l.pk'):
+glottonames = {}
+rglottonames = {}
+for row in GC.execute('select ll.hid, l.id, l.latitude, l.longitude, l.name from language as l, languoid as ll where ll.pk = l.pk'):
     if row[0] and len(row[0]) == 3:
+        rglottonames[slug(row[4])] = row[0]
         glottocodes[row[0]] = row[1]
+        glottonames[row[0]] = row[4]
         if row[2] != None:
             glottocoords[row[0]] = (row[2], row[3])
 
@@ -167,30 +171,69 @@ def main(args):
 
     contrib = data.add(common.Contribution, 'afbo', name="AfBo", id="afbo")
 
-    for i, name in enumerate(languages.keys()):
-        md = languages[name]
-        iso = md.pop('iso')
-        kw = dict(name=name, id=str(i+1), jsondata=md)
-        if name in COORDS:
-            kw['latitude'], kw['longitude'] = COORDS[name]
-        elif slug(name) in coords:
-            kw['latitude'], kw['longitude'] = coords[slug(name)]
-        elif glottocoords.get(iso):
-            kw['latitude'], kw['longitude'] = glottocoords[iso]
-        if not 'latitude' in kw:
-            print name
-        l = data.add(common.Language, name, **kw)
+    iso_map = {
+        ('ron', 'Meglenite Romanian'): ('ruq', None),
+        ('fra', 'Norman French'): ('xno', None),
+        ('tur', 'Turkic'): (None, None),
+        ('xuu', 'Kxoe languages'): (None, None),
+        ('zoc', 'Zoquean languages'): (None, None),
+        ('tzm', 'Moroccan Berber languages'): (None, None),
+        ('cvn', 'Quechua'): ('qvn', None),
+        ('rop', 'Gurindji Kriol'): (None, 'guri1249'),
+        ('ita', 'Sicilian Italian'): ('scn', None),
+        ('srp', 'Croatian'): ('hrv', None),
+        ('eme', 'Wayampi‑Emerillon‑Zo’é'): (None, None),
+        ('ale', 'Copper Island Aleut'): ('mud', None),
+        ('car', 'intermediate Proto‑Carib'): (None, None),
+        ('ell', 'Cappadocian Greek'): ('cpg', None),
+        ('eng', 'Middle English'): ('enm', None),
+        ('als', 'Arvanitic Albanian'): ('aat', None),
+        ('nys', 'Northern Nyungic'): (None, None),
+        ('ron', 'Istro‑Romanian'): ('ruo', None),
+        ('chf', 'Cho’ol'): ('ctu', None),
+        ('tuo', 'Eastern Tucanoan languages'): (None, None),
+        ('ceb', 'Visayan'): (None, None),
+        ('por', 'Sri Lanka Portuguese'): (None, 'mala1544'),
+        ('brx', 'Tibeto-Burman languages'): (None, None),
+    }
 
-        for code, type_ in [
-            (iso, common.IdentifierType.iso),
-            (glottocodes.get(iso), common.IdentifierType.glottolog)
-        ]:
-            if code:
-                identifier = data.add(
-                    common.Identifier, code, id=code, name=code, type=type_.value)
-                data.add(
-                    common.LanguageIdentifier, '%s-%s' % (code, l.id),
-                    identifier=identifier, language=l)
+    with open('name_conflicts.tab', 'w') as fp:
+        fp.write('iso\tafbo\tglottolog\tproposed iso\n')
+        for i, name in enumerate(languages.keys()):
+            md = languages[name]
+            iso = md.pop('iso')
+            if iso == 'cvn' and name == 'Quechua':
+                iso = 'qvn'
+            kw = dict(name=name, id=str(i+1), jsondata=md)
+            if name in COORDS:
+                kw['latitude'], kw['longitude'] = COORDS[name]
+            elif slug(name) in coords:
+                kw['latitude'], kw['longitude'] = coords[slug(name)]
+            elif glottocoords.get(iso):
+                kw['latitude'], kw['longitude'] = glottocoords[iso]
+
+            if glottonames.get(iso) and slug(glottonames.get(iso)) != slug(name):
+                fp.write(('%s\t%s\t%s\t%s\n' % (
+                    iso, name, glottonames.get(iso), rglottonames.get(slug(name), ''))).encode('utf8'))
+
+            if name == 'Meglenite Romanian':
+                kw['name'] = 'Megleno Romanian'
+            if not 'latitude' in kw:
+                print name
+            l = data.add(common.Language, name, **kw)
+
+            iso, gc = iso_map.get((iso, name), (iso, None))
+
+            for code, type_ in [
+                (iso, common.IdentifierType.iso),
+                (gc or glottocodes.get(iso), common.IdentifierType.glottolog)
+            ]:
+                if code:
+                    identifier = data.add(
+                        common.Identifier, code, id=code, name=code, type=type_.value)
+                    data.add(
+                        common.LanguageIdentifier, '%s-%s' % (code, l.id),
+                        identifier=identifier, language=l)
 
     include = sources.keys() + [
         'myersscottoncontact2002', 'myersscottonlanguage2007',
@@ -214,9 +257,9 @@ def main(args):
             models.Pair,
             id_,
             id=str(id_),
-            name=vd['pairs'],
+            name=vd['pairs'].replace('Meglenite', 'Megleno'),
             area=recipient.jsondata['macroarea'],
-            description=unicode(doc[id_]['comment']).replace('<h1', '<p').replace('</h1>', '</p>'),
+            description=unicode(doc[id_]['comment']).replace('<h1', '<p').replace('</h1>', '</p>').replace('Meglenite', 'Megleno'),
             reliability=vd['reliability'],
             int_reliability=['high', 'mid', 'low'].index(vd['reliability']),
             count_interrel=int(vd[u'number of interrelated affixes']),

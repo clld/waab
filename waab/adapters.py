@@ -19,9 +19,11 @@ class Matrix(CsvDump):
     md_fields = [
         ('ID', lambda p: None),
         ('Recipient name', lambda p: p.recipient.name),
+        ('Recipient glottocode', lambda p: p.recipient.glottocode),
         ('Recipient iso639-3', lambda p: p.recipient.iso_code),
         ('Recipient genus', lambda p: p.recipient.jsondatadict.get('genus')),
         ('Donor name', lambda p: p.donor.name),
+        ('Donor glottocode', lambda p: p.donor.glottocode),
         ('Donor iso639-3', lambda p: p.donor.iso_code),
         ('Donor genus', lambda p: p.donor.jsondatadict.get('genus')),
         ('reliability', lambda p: p.reliability),
