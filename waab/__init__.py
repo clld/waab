@@ -48,6 +48,7 @@ class waabMapMarker(MapMarker):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    settings['sitemaps'] = 'pair parameter source'.split()
     config = get_configurator('waab', (waabMapMarker(), IMapMarker), settings=settings)
     config.register_resource('pair', models.Pair, IPair, with_index=True)
     config.register_adapter(adapter_factory('pair/detail_html.mako'), IPair)
