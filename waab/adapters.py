@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from clld.web.adapters.geojson import GeoJsonParameter
+from clld.web.adapters.geojson import GeoJsonParameter, GeoJsonLanguages
 from clld.web.adapters.download import CsvDump
-from clld.interfaces import IParameter
+from clld.interfaces import IParameter, ILanguage, IIndex
 from clld.db.meta import DBSession
 from clld.db.models.common import Parameter
 
@@ -13,6 +13,12 @@ class GeoJsonAffixFunction(GeoJsonParameter):
     def feature_properties(self, ctx, req, valueset):
         return {'label': '%s: %s' % (
             valueset.language, ', '.join(v.format() for v in valueset.values))}
+
+
+class GeoJsonAfboLanguages(GeoJsonLanguages):
+    def feature_properties(self, ctx, req, language):
+        if language.donor_assocs:
+            return {'zindex': 1000}
 
 
 class Matrix(CsvDump):
@@ -49,3 +55,5 @@ class Matrix(CsvDump):
 def includeme(config):
     config.register_download(Matrix(Pair, 'waab', description='AFBO value matrix'))
     config.register_adapter(GeoJsonAffixFunction, IParameter)
+    config.registry.registerAdapter(
+        GeoJsonAfboLanguages, (ILanguage,), IIndex, name=GeoJsonLanguages.mimetype)

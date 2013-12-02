@@ -311,7 +311,7 @@ def prime_cache(args):
             colors[i] = color
 
     icons_dir = path(waab.__file__).dirname().joinpath('static')
-    for color in colors.values():
+    for color in colors.values() + ['ffffff']:
         figure(figsize=(0.4, 0.4))
         axes([0.1, 0.1, 0.8, 0.8])
         coll = pie((100,), colors=('#' + color,))
@@ -321,6 +321,10 @@ def prime_cache(args):
     for l in DBSession.query(common.Language)\
             .join(models.Pair, common.Language.pk == models.Pair.recipient_pk):
         l.update_jsondata(color=colors[max(p.count_borrowed for p in l.donor_assocs)])
+
+    for l in DBSession.query(common.Language):
+        if not l.donor_assocs:
+            l.update_jsondata(color='ffffff')
 
     for p in DBSession.query(models.Pair):
         for source_id in set(waab.SOURCE_ID_PATTERN.findall(p.description)):

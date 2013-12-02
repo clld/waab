@@ -26,6 +26,14 @@ class LanguagesMap(Map):
                 literal(label + ' affixes'),
                 style='margin-left: 1em; margin-right: 1em;'))
 
+        values.append(HTML.label(
+            HTML.img(
+                src=self.req.static_url('waab:static/ffffff.png'),
+                height='20',
+                width='20'),
+            literal('donor language'),
+            style='margin-left: 1em; margin-right: 1em;'))
+
         yield Legend(self, 'values', values, label='Legend')
 
 
