@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 
 requires = [
     'clld>=0.16',
+    'clldmpg>=0.3',
     'pyramid>=1.5.1',
     'SQLAlchemy>=0.8.7',
     'transaction',

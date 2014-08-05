@@ -50,6 +50,7 @@ def main(global_config, **settings):
     """
     settings['sitemaps'] = 'pair parameter source'.split()
     config = get_configurator('waab', (waabMapMarker(), IMapMarker), settings=settings)
+    config.include('clldmpg')
     config.register_resource('pair', models.Pair, IPair, with_index=True)
     config.register_adapter(adapter_factory('pair/detail_html.mako'), IPair)
     config.register_adapter(adapter_factory('pair/index_html.mako', base=Index), IPair)
