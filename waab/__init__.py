@@ -4,7 +4,7 @@ import re
 from clld.web.app import get_configurator, menu_item, MapMarker
 from clld.web.adapters.base import Index, adapter_factory
 from clld.web.adapters.download import Download
-from clld.interfaces import IMapMarker, ILanguage, IValueSet, IValue
+from clld.interfaces import IMapMarker, ILanguage, IValueSet
 from clld.db.models.common import Source
 
 # we must make sure custom models are known at database initialization!
@@ -42,7 +42,7 @@ class waabMapMarker(MapMarker):
         if c:
             return req.static_url('waab:static/%s.png' % c)
 
-        return super(waabMapMarker, self).__call__(ctx, req)
+        return super(waabMapMarker, self).__call__(ctx, req)  # pragma: no cover
 
 
 def main(global_config, **settings):
@@ -67,6 +67,4 @@ def main(global_config, **settings):
     config.include('waab.datatables')
     config.include('waab.adapters')
     config.include('waab.maps')
-    config.add_route('about', '/about')
-    config.add_view(lambda r: {}, route_name='about', renderer='about.mako')
     return config.make_wsgi_app()

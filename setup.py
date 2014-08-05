@@ -2,26 +2,21 @@ import os
 
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.txt')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'clld',
-    'pyramid',
-    'SQLAlchemy',
+    'clld>=0.16',
+    'pyramid>=1.5.1',
+    'SQLAlchemy>=0.8.7',
     'transaction',
     'pyramid_tm',
     'zope.sqlalchemy',
-    'gunicorn',
-    'psycopg2',
     'waitress',
-    ]
+]
 
 setup(name='waab',
       version='0.0',
       description='waab',
-      long_description=README + '\n\n' + CHANGES,
+      long_description='',
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pyramid",
@@ -42,4 +37,4 @@ setup(name='waab',
       [paste.app_factory]
       main = waab:main
       """,
-      )
+)

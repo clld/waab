@@ -1,4 +1,7 @@
+development.ini
 *.py[cod]
+*.komodoproject
+*/static/download
 
 # C extensions
 *.so
@@ -30,3 +33,4 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+.idea

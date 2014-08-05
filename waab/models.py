@@ -3,20 +3,18 @@ from __future__ import unicode_literals
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
-    String,
     Unicode,
     Integer,
-    Boolean,
     ForeignKey,
     UniqueConstraint,
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin
-from clld.db.models.common import Language, Value, IdNameDescriptionMixin, Parameter, Source
+from clld.db.models.common import (
+    Language, Value, IdNameDescriptionMixin, Parameter, Source,
+)
 
 from waab.interfaces import IPair
 
@@ -37,14 +35,16 @@ class Pair(Base, IdNameDescriptionMixin):
     count_interrel = Column(Integer)
     count_borrowed = Column(Integer)
 
-    recipient = relationship(Language, primaryjoin=recipient_pk==Language.pk, backref='donor_assocs')
-    donor = relationship(Language, primaryjoin=donor_pk==Language.pk, backref='recipient_assocs')
+    recipient = relationship(
+        Language, primaryjoin=recipient_pk == Language.pk, backref='donor_assocs')
+    donor = relationship(
+        Language, primaryjoin=donor_pk == Language.pk, backref='recipient_assocs')
     sources = relationship(Source, secondary=PairSource.__table__, backref='pairs')
 
 
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # specialized common mapper classes
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @implementer(interfaces.IValue)
 class waabValue(Value, CustomModelMixin):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)

@@ -154,8 +154,12 @@ class waabValues(Values):
     def col_defs(self):
         if self.parameter:
             return [
-                LinkCol(self, 'languages', sTitle="Languages", get_obj=lambda i: i.pair, model_col=Pair.name),
-                ValueCol(self, 'value', sTitle='number of borrowed %s affixes' % self.parameter.name),
+                LinkCol(
+                    self, 'languages',
+                    sTitle="Languages", get_obj=lambda i: i.pair, model_col=Pair.name),
+                ValueCol(
+                    self, 'value',
+                    sTitle='number of borrowed %s affixes' % self.parameter.name),
                 LinkToMapCol(self, 'm', get_obj=lambda i: i.pair.recipient)]
         if self.pair:
             return [
