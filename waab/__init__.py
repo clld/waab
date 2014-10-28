@@ -2,7 +2,6 @@ from functools import partial
 import re
 
 from clld.web.app import get_configurator, menu_item, MapMarker
-from clld.web.adapters.base import Index, adapter_factory
 from clld.web.adapters.download import Download
 from clld.interfaces import IMapMarker, ILanguage, IValueSet
 from clld.db.models.common import Source
@@ -52,8 +51,7 @@ def main(global_config, **settings):
     config = get_configurator('waab', (waabMapMarker(), IMapMarker), settings=settings)
     config.include('clldmpg')
     config.register_resource('pair', models.Pair, IPair, with_index=True)
-    config.register_adapter(adapter_factory('pair/detail_html.mako'), IPair)
-    config.register_adapter(adapter_factory('pair/index_html.mako', base=Index), IPair)
+
     config.register_menu(
         ('dataset', partial(menu_item, 'dataset', label='Home')),
         ('about', lambda c, r: (r.route_url('about'), 'About')),
@@ -65,7 +63,4 @@ def main(global_config, **settings):
     config.register_download(Download(
         Source, 'waab', ext='bib', description="Sources as BibTeX"))
 
-    config.include('waab.datatables')
-    config.include('waab.adapters')
-    config.include('waab.maps')
     return config.make_wsgi_app()

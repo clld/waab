@@ -1,11 +1,11 @@
 # coding: utf8
 # flake8: noqa
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 import re
 
 from bs4 import BeautifulSoup as bs
 
-from clld.util import slug
+from clld.util import slug, nfilter
 from clld.lib import bibtex
 from clld.scripts.util import parsed_args
 
@@ -68,7 +68,7 @@ def reflink(name, mm, bib):
         name = 'bhat'
     if (name, mm.group('year') + (mm.group('letter') or '')) not in bib:
         if (name, mm.group('year')) not in bib:
-            print '###', (name, mm.group('year') + (mm.group('letter') or ''))
+            print('###', (name, mm.group('year') + (mm.group('letter') or '')))
             return '%s%s%s' % (
                 mm.group('year'),
                 mm.group('letter') or '',
@@ -146,7 +146,6 @@ def replace(c, bib):
             new.append(re.split('[0-9]', cit, 1)[0])
             cit = re.match(citation, cit.strip(), re.U)
             # replace name and year with link
-            #print cit.group('name'), mm.group('year'), mm.group('letter'), mm.group('pages')
             new.append(reflink(cit.group('name'), cit, bib))
             n += 1
         new.append(')')
@@ -168,7 +167,7 @@ def replace(c, bib):
         pos = m.end()
     new.append(c[pos:])
 
-    print n
+    print(n)
     return ''.join(new)
 
 
@@ -223,7 +222,7 @@ def get_bib(soup, refdb):
         return slug(first + last)
 
     def normalize_bib(name):
-        return filter(None, [slug(n.strip()) for n in name.split(' and ')])
+        return nfilter([slug(n.strip()) for n in name.split(' and ')])
 
     recids = [rec.id for rec in refdb]
     assert len(set(recids)) == len(set(map(slug, recids)))
@@ -234,11 +233,11 @@ def get_bib(soup, refdb):
         refmap[rec.id] = (slug(''.join(authors)), rec.get('year', 'noyear'), slug(title_sep.split(title)[0]))
 
     res = {
-        (u'weinreich', u'1953'): 'weinreich_languages_1953',
-        (u'sandfeld', u'1938'): 'sandfeld_problemes_1938',
-        (u'capidan', u'1940'): 'capidan_bilinguisme_1940',
-        ### (u'baht', u'1987')
-        (u'hualdeandurbina', u'2003'): 'hualde_grammar_2003',
+        ('weinreich', '1953'): 'weinreich_languages_1953',
+        ('sandfeld', '1938'): 'sandfeld_problemes_1938',
+        ('capidan', '1940'): 'capidan_bilinguisme_1940',
+        ### ('baht', '1987')
+        ('hualdeandurbina', '2003'): 'hualde_grammar_2003',
     }
 
     global BIB
@@ -251,7 +250,7 @@ def get_bib(soup, refdb):
             try:
                 author, year, rem = re.split('\s*([0-9]{4}[a-z]?)\.\s*', ref, 1)
             except:
-                print ref
+                print(ref)
                 raise
         if author != '---':
             if author.endswith('.'):
@@ -269,7 +268,7 @@ def get_bib(soup, refdb):
         try:
             assert rec
         except AssertionError:
-            print ref
+            print(ref)
         res[(slug(get_cite_name(name)), year)] = rec
         if rec in BIB:
             BIB[rec].append(ref)
@@ -292,10 +291,10 @@ def main(args):
 
     with open(args.data_file('MB_Case_List_with_links.html'), 'w') as fp:
         fp.write(replace(c, bib).encode('utf8'))
-    print len(LINKED)
+    print(len(LINKED))
     for recid in BIB:
         if recid not in LINKED:
-            print BIB[recid]
+            print(BIB[recid])
 
 
 if __name__ == '__main__':

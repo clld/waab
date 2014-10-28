@@ -1,6 +1,6 @@
 # coding: utf8
 # flake8: noqa
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 import sys
 import re
 
@@ -104,7 +104,7 @@ def main(args):
 
     for f in fields:
         if fields.count(f) > 1:
-            print f
+            print(f)
 
     assert len(fields) == len(set(fields))
 
@@ -220,7 +220,7 @@ def main(args):
             if name == 'Meglenite Romanian':
                 kw['name'] = 'Megleno Romanian'
             if not 'latitude' in kw:
-                print name
+                print(name)
             l = data.add(common.Language, name, **kw)
 
             iso, gc = iso_map.get((iso, name), (iso, None))
@@ -332,7 +332,7 @@ def prime_cache(args):
             try:
                 p.sources.append(common.Source.get(source_id))
             except:
-                print source_id
+                print(source_id)
 
 
 if __name__ == '__main__':

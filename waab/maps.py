@@ -1,5 +1,6 @@
 from clld.web.maps import Map, Legend
 from clld.web.util.htmllib import HTML, literal
+from clld.web.util.helpers import marker_img
 
 from waab import COLOR_MAP
 
@@ -9,6 +10,12 @@ class LanguagesMap(Map):
         return {'no_popup': True}
 
     def get_legends(self):
+        def html_label(marker_spec, text):
+            return HTML.label(
+                marker_img(self.req.static_url(marker_spec)),
+                literal(text),
+                style='margin-left: 1em; margin-right: 1em;')
+
         values = []
         for _min, _max, color in COLOR_MAP:
             if not _max:
@@ -18,22 +25,9 @@ class LanguagesMap(Map):
             else:
                 label = '-'.join(map(str, [_min, _max]))
 
-            values.append(HTML.label(
-                HTML.img(
-                    src=self.req.static_url('waab:static/%s.png' % color),
-                    height='20',
-                    width='20'),
-                literal(label + ' affixes'),
-                style='margin-left: 1em; margin-right: 1em;'))
+            values.append(html_label('waab:static/%s.png' % color, label + ' affixes'))
 
-        values.append(HTML.label(
-            HTML.img(
-                src=self.req.static_url('waab:static/ffffff.png'),
-                height='20',
-                width='20'),
-            literal('donor language'),
-            style='margin-left: 1em; margin-right: 1em;'))
-
+        values.append(html_label('waab:static/ffffff.png', 'donor language'))
         yield Legend(self, 'values', values, label='Legend')
 
 

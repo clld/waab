@@ -2,21 +2,7 @@
 <%namespace name="util" file="../util.mako"/>
 
 <%def name="sidebar()">
-##  <div id="search">
-##<script>
-##  (function() {
-##    var cx = '012093784907070887713:jcfn89xjzce';
-##    var gcse = document.createElement('script');
-##    gcse.type = 'text/javascript';
-##    gcse.async = true;
-##    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
-##        '//www.google.com/cse/cse.js?cx=' + cx;
-##    var s = document.getElementsByTagName('script')[0];
-##    s.parentNode.insertBefore(gcse, s);
-##  })();
-##</script>
-##<gcse:search></gcse:search>
-##  </div>
+    ${util.cite()}
 </%def>
 
 <h2>Welcome to AfBo</h2>
@@ -43,10 +29,5 @@
     is  published under a
     <a rel="license" href="${request.dataset.license}">
         ${request.dataset.jsondatadict.get('license_name', request.dataset.license)}
-    </a>. AfBo should be cited as
-    ${h.cite_button(request, ctx)}
+    </a>.
 </p>
-<% citation = h.get_adapter(h.interfaces.IRepresentation, ctx, request, ext='md.txt') %>
-<blockquote style="font-size: larger;">
-    ${h.newline2br(citation.render(ctx, request))|n}
-</blockquote>
