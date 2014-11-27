@@ -46,7 +46,7 @@ class Pair(Base, IdNameDescriptionMixin):
 # specialized common mapper classes
 # ----------------------------------------------------------------------------
 @implementer(interfaces.IValue)
-class waabValue(Value, CustomModelMixin):
+class waabValue(CustomModelMixin, Value):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
     pair_pk = Column(Integer, ForeignKey('pair.pk'))
     pair = relationship(Pair, backref='values')
@@ -57,7 +57,7 @@ class waabValue(Value, CustomModelMixin):
 
 
 @implementer(interfaces.IParameter)
-class AffixFunction(Parameter, CustomModelMixin):
+class AffixFunction(CustomModelMixin, Parameter):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
     representation = Column(Integer)
     count_borrowed = Column(Integer)
