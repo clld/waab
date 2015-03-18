@@ -34,9 +34,9 @@ class waabMapMarker(MapMarker):
     def __call__(self, ctx, req):
         c = None
         if ILanguage.providedBy(ctx):
-            c = ctx.jsondatadict.get('color')
+            c = ctx.jsondata.get('color')
         elif IValueSet.providedBy(ctx):
-            c = ctx.language.jsondatadict.get('color')
+            c = ctx.language.jsondata.get('color')
 
         if c:
             return req.static_url('waab:static/%s.png' % c)

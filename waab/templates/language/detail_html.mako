@@ -4,7 +4,7 @@
 
 <h2>${ctx.name}</h2>
 
-${util.dl_table(('Genus', ctx.jsondatadict['genus']), ('Area', ctx.jsondatadict['macroarea']))}
+${util.dl_table(('Genus', ctx.jsondata['genus']), ('Area', ctx.jsondata['macroarea']))}
 
 <% attrs = ['donor', 'recipient'] %>
 % for i, attr in enumerate(attrs):

@@ -28,6 +28,6 @@
     <a href="${request.route_url('download')}">downloadable database</a>,
     is  published under a
     <a rel="license" href="${request.dataset.license}">
-        ${request.dataset.jsondatadict.get('license_name', request.dataset.license)}
+        ${request.dataset.jsondata.get('license_name', request.dataset.license)}
     </a>.
 </p>
