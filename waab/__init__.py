@@ -1,7 +1,9 @@
 from functools import partial
 import re
 
-from clld.web.app import get_configurator, menu_item, MapMarker
+from pyramid.config import Configurator
+
+from clld.web.app import menu_item, MapMarker
 from clld.web.adapters.download import Download
 from clld.interfaces import IMapMarker, ILanguage, IValueSet
 from clld.db.models.common import Source
@@ -48,10 +50,10 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     settings['sitemaps'] = 'pair parameter source'.split()
-    config = get_configurator('waab', (waabMapMarker(), IMapMarker), settings=settings)
+    config = Configurator(settings=settings)
     config.include('clldmpg')
+    config.registry.registerUtility(waabMapMarker(), IMapMarker)
     config.register_resource('pair', models.Pair, IPair, with_index=True)
-
     config.register_menu(
         ('dataset', partial(menu_item, 'dataset', label='Home')),
         ('about', lambda c, r: (r.route_url('about'), 'About')),

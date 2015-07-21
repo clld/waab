@@ -1,20 +1,20 @@
 from setuptools import setup, find_packages
 
 requires = [
-    'clld>=0.32',
-    'clldmpg>=0.6',
+    'clldmpg>=1.0.0',
 ]
 
 tests_require = [
     'WebTest',
-    'mock',
+    'mock==1.0',
 ]
 
-setup(name='waab',
-      version='0.0',
-      description='waab',
-      long_description='',
-      classifiers=[
+setup(
+    name='waab',
+    version='0.0',
+    description='waab',
+    long_description='',
+    classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
@@ -22,19 +22,18 @@ setup(name='waab',
         "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        ],
-      author='',
-      author_email='',
-      url='',
-      keywords='web pyramid pylons',
-      packages=find_packages(),
-      include_package_data=True,
-      zip_safe=False,
-      install_requires=requires,
-      tests_require=tests_require,
-      test_suite="waab",
-      entry_points="""\
-      [paste.app_factory]
-      main = waab:main
-      """,
-)
+    ],
+    author='',
+    author_email='',
+    url='',
+    keywords='web pyramid pylons',
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=requires,
+    tests_require=tests_require,
+    test_suite="waab",
+    entry_points="""\
+    [paste.app_factory]
+    main = waab:main
+    """)
