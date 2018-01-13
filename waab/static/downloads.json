@@ -1,0 +1,47 @@
+{
+    "1.0": {
+        "bitstreams": [
+            {
+                "last-modified": 1515874210941,
+                "checksum": "8a717f65f1efab9b2e201e6c10c9bbf2",
+                "created": 1515874210642,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "afbo_dataset.cldf.zip",
+                "filesize": 40034,
+                "content-type": "application/zip"
+            },
+            {
+                "last-modified": 1515874214481,
+                "checksum": "4e1e95164fe5c6d35d7bf3338c2f45a2",
+                "created": 1515874214260,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "afbo_dataset.n3.gz",
+                "filesize": 142145,
+                "content-type": "application/octet-stream"
+            },
+            {
+                "last-modified": 1515874215357,
+                "checksum": "8c2184d192681fa557688d400d12ffe9",
+                "created": 1515874215103,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "afbo_pair.csv.zip",
+                "filesize": 7792,
+                "content-type": "application/zip"
+            },
+            {
+                "last-modified": 1515874216221,
+                "checksum": "1dfa8ae5218eb69c10ae2925084fbbeb",
+                "created": 1515874216084,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "afbo_source.bib.zip",
+                "filesize": 23021,
+                "content-type": "application/zip"
+            }
+        ],
+        "oid": "EAEA0-59C8-38F2-28DC-0",
+        "metadata": {
+            "title": "waab 1.0 - downloads",
+            "creator": "pycdstar"
+        }
+    }
+}
